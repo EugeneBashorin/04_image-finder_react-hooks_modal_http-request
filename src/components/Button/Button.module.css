@@ -1,0 +1,11 @@
+.button{
+    background-color: rgb(55, 95, 206);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 7px 25px 7px 25px;
+}
+.buttonWrapper{
+    text-align: center;
+    margin-top: 20px;
+}

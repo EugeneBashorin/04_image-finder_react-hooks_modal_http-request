@@ -1,0 +1,14 @@
+.gallery{
+    max-width: 1200px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    margin: -5px;
+    /* border: 1px solid green; */
+}
+.gallerySection{
+    width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
