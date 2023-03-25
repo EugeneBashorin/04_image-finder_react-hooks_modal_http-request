@@ -8,8 +8,6 @@ export const MessageBlock = ({children}) => {
     )
 }
 
-// export default MessageBlock;
-
 MessageBlock.propTypes = {
     children: PropTypes.string,
   };

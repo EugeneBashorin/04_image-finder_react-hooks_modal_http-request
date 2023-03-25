@@ -1,41 +1,34 @@
 import React from "react";
-import { Component } from "react";
+import {useState} from "react";
 import PropTypes from 'prop-types';
 
 import css from "./ImageGallerryItem.module.css";
 import Modal from "../Modal";
 
-class ImageGalleryItem extends Component{
-    state={
-        isModalActive: false,
+const ImageGalleryItem = (imagesData) => {
+    const[isModalActive, setIsModalActive]=useState(false);
+    const onOpenModal = () => {
+        setIsModalActive(!isModalActive)
     }
-
-    onOpenModal = () => {
-        this.setState({isModalActive: !this.state.isModalActive})
+    const onCloseModal = () => {
+        setIsModalActive(false);
     }
-
-    onCloseModal = () => {
-        this.setState({isModalActive: false})
-    }
-
-    render(){
-        return(   
-            <li className={css.galleryItem}
-                key={this.props.id} 
-                onClick={this.onOpenModal}>
-                    <img className={css.imgItem} 
-                         src={this.props.webPreviewImg} 
-                         alt={this.props.tags}
-                        />
-                {this.state.isModalActive && (
-                <Modal onClose={this.onCloseModal}>
-                    <img src={this.props.largeImageURL} 
-                         alt={this.props.tags}
-                        />
-                </Modal>)}
-            </li>
-        )
-    }
+    return(  
+        <li className={css.galleryItem}
+            key={imagesData.id} 
+            onClick={onOpenModal}>
+            <img className={css.imgItem} 
+                 src={imagesData.webPreviewImg} 
+                 alt={imagesData.tags}
+                    />
+            {isModalActive && (
+            <Modal onClose={onCloseModal}>
+                <img src={imagesData.largeImageURL} 
+                     alt={imagesData.tags}
+                    />
+            </Modal>)}
+        </li>
+    )
 }
 
 export default ImageGalleryItem;

@@ -3,71 +3,75 @@ import Button from './Button'
 import Searchbar from './Searchbar'
 import Loader from './Loader';
 import {MessageBlock} from './MessageBlock/MessageBlock.jsx';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 import { apiGetImages } from 'services/pixabay-api.js';
+import { usePreviousData } from 'hooks/hooks.jsx';
 
-export class App extends Component {
-  state = {
-    imagesDataObj: [],
-    currentPage: 1,
-    query:"",
-    error: null,
-    status: 'idle', // 'pending' / 'resolve' / 'rejected'
-  }
-  
-  searchbarSubmitHandler = query =>{
-    this.setState({query: query})
-  }
+export const App = () => {
+  const[imagesDataObj, setImagesDataObj] = useState([]);
+  const[currentPage, setCurrentPage] = useState(1);
+  const[query, setQuery] = useState("");
+  const[error, setError] = useState(null);
+  const[status, setStatus] = useState('idle');
 
-  onMoreLoad = () => {
-    this.setState(prevState=>
-       ({currentPage: prevState.currentPage + 1})
-      )
+  const searchbarSubmitHandler = query =>{
+    setQuery(query);
+    setCurrentPage(1);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot){
-    if(prevState.currentPage !== this.state.currentPage || prevState.query !== this.state.query){
-        this.setState( { status: 'pending' } )
-        apiGetImages(this.state.query, this.state.currentPage)
-        .then(data => data.hits)
-        .then(hits => {
-          if(hits.length > 0){
-            if(this.state.query !== prevState.query){
-              this.setState(({imagesDataObj: [...hits]}))
-            }else{
-              this.setState(prevStave=>({imagesDataObj: [...prevState.imagesDataObj, ...hits]}))
-            }
-              this.setState({status:'resolve',error:""})
-          }else{
-              toast.error(`Something go wrong, we didn't find images with "${this.state.query}" query`)
-            }
-          }
-        )
-        .catch(errorMessage => {
-          this.setState({status:'rejected', error: "Something go wrong, try again later..."});
-          console.log("Error with: 404, Error Message: ", errorMessage.message)
-      })
+  const onMoreLoad = () => {
+    setCurrentPage(prevState => (prevState + 1))
+  }
+
+  //get previos state
+  const previosQuery = usePreviousData(query);
+
+  //componentDidUpdate
+  useEffect(() => {
+    if(query === ""){
+      setStatus('idle');
+      return;
     }
-  }
-  render(){
-    const{status, imagesDataObj, error} = this.state;
-    return( 
-      <> 
-        <Searchbar onSubmitProps={this.searchbarSubmitHandler}/>
-        {status ==='rejected' && <MessageBlock>{error}</MessageBlock>}
-        {status ==='idle' && <MessageBlock>Give me a query...</MessageBlock>}
-        {imagesDataObj && <ImageGallery imagesData={imagesDataObj}/>}
-        {status ==='pending' && <Loader/>}
-        {status ==='resolve' && <Button nextPage={this.onMoreLoad}>Load more</Button>}
-        <ToastContainer 
-              position="top-right" 
-              autoClose={2000} 
-              hideProgressBar={false} 
-              newestOnTop={false}
-              />
-      </>
-    );
-  }
+    setStatus('pending');
+
+    apiGetImages(query, currentPage)
+    .then(data => data.hits)
+    .then(hits => {
+      if(hits.length === 0){
+        toast.error(`We didn't find images with "${query}" query`)
+      }
+      if(query !== previosQuery){
+        setImagesDataObj([...hits]);
+      }else{
+        setImagesDataObj( prevState =>([...prevState, ...hits]))
+        }
+        setStatus('resolve');
+        setError("");
+        }
+      )
+    .catch(errorMessage => {
+    setStatus('rejected');
+    setError("Something go wrong, try again later...");
+    console.log("Error with: 404, Error Message: ", errorMessage.message)
+    })    
+  },[currentPage, query])
+
+  return( 
+    <> 
+      <Searchbar onSubmitProps={searchbarSubmitHandler}/>
+      {status ==='rejected' && <MessageBlock>{error}</MessageBlock>}
+      {status ==='idle' && <MessageBlock>Give me a query...</MessageBlock>}
+      {imagesDataObj && <ImageGallery imagesData={imagesDataObj}/>}
+      {status ==='pending' && <Loader/>}
+      {status ==='resolve' && <Button nextPage={onMoreLoad}>Load more</Button>}
+      <ToastContainer 
+        position="top-right" 
+        autoClose={2000} 
+        hideProgressBar={false} 
+        newestOnTop={false}
+      />
+    </>
+  );
 };

@@ -1,35 +1,32 @@
 import PropTypes from 'prop-types';
-import React, { Component } from "react";
+import React, { useState } from "react";
 import css from "./Search.module.css";
 import { toast } from 'react-toastify';
 import { ReactComponent as LoupeIcon } from "../../icons/magnifying-glass-icon.svg";
 
-class Searchbar extends Component {
-    state = {
-        queryData: "",
+const Searchbar = ({onSubmitProps}) => {
+    const[queryData, setQueryData] = useState("");
+    const handleChange = (event) => {
+        setQueryData(event.target.value.toLowerCase())
     }
-    handleChange = (event) => {
-        this.setState({queryData: event.target.value.toLowerCase()})
-    }
-    getQuery = (event) => {
+    const getQuery = (event) => {
         event.preventDefault();
-        if(this.state.queryData.trim() === ""){
+        if(queryData.trim() === ""){
             toast.info("Just take me a query!");
             return;
         }
-        this.props.onSubmitProps(this.state.queryData);        
+        onSubmitProps(queryData);       
     }
-    render(){
         return(
             <header className={css.searchbar}>
-                <form className={css.form} onSubmit={this.getQuery}>
+                <form className={css.form} onSubmit={getQuery}>
                         <button type="submit" className={css.button}>
                             <LoupeIcon width="15" height="15"/>
                         </button>
                         <input
                             className={css.input}
                             name='imageRequest'
-                            onChange={this.handleChange}
+                            onChange={handleChange}
                             type="text"
                             autoComplete="off"
                             autoFocus
@@ -38,7 +35,6 @@ class Searchbar extends Component {
                 </form>
             </header>
     )
-  }
 }
 
 export default Searchbar;
